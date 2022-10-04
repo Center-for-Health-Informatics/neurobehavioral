@@ -2,21 +2,16 @@
 
 {% block content %}
 
-    <h1>home</h1>
+    <h1>Home</h1>
+    <hr>
 
-    {% comment %}
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-success">
-            Get visit info
-        </button>
-    </form>
-    {% endcomment %}
+
+
 
     <form method="post" action="{% url 'update_new_visits' %}">
         {% csrf_token %}
         <button type="submit" class="btn btn-success">
-            Update new visits in REDCap
+            Create instruments for all unprocessed visits
         </button>
     </form>
 
@@ -27,28 +22,43 @@
         </button>
     </form>
 
-    {% if data_table %}
-        <table class="table">
-            <thead>
+    <hr>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Visit ID</th>
+                <th>Visit instance</th>
+                <th>Visit Studies</th>
+                <th>Visit Age</th>
+                <th>Visit Group Mem</th>
+                <th>Processed?</th>
+                <th>Created Instrument/Instance #</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for visit in visits %}
                 <tr>
-                    <th>Record ID</th>
-                    <th>Visit Info Age</th>
-                    <th>Subject Studies</th>
-                    <th>Visit Studies</th>
+                    <td>{{ visit.record_id }}</td>
+                    <td>{{ visit.redcap_repeat_instrument }}</td>
+                    <td>{{ visit.visit_info_studies }}</td>
+                    <td>{{ visit.visit_info_age }}</td>
+                    <td>{{ visit.visit_info_group_mem }}</td>
+                    <td>
+                        {% if visit.completed_visit %}
+                            YES
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if visit.completed_visit %}
+                            {% for oCreated in visit.completed_visit.createdinstrument_set.all %}
+                                • {{ oCreated.instrument_name }} (#{{ oCreated.instance }})<br>
+                            {% endfor %}
+                        {% endif %}
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                {% for entry in data_table %}
-                    <tr>
-                        <td>{{ entry.0 }}</td>
-                        <td>{{ entry.1 }}</td>
-                        <td>{{ entry.2 }}</td>
-                        <td>{{ entry.3 }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
 
 
 {% endblock %}

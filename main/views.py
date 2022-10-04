@@ -20,38 +20,27 @@ from . import utils
 @login_required
 def home(request):
     context = {}
-    if request.method == "POST":
-        oConnection = RedcapConnection.objects.get(unique_name="main_repo")
-        options = {
-            'fields[0]': 'record_id',
-            'fields[1]': 'studyids_studies',
-            'fields[2]': 'visit_info_age',
-            'fields[3]': 'visit_info_date',
-            'fields[4]': 'visit_info_studies',
-            # 'forms[0]': 'visit_information',
-            'events[0]': 'all_measures_arm_1',
-            'events[1]': 'subject_info_arm_1',
-        }
-        response = utils.run_request("record", oConnection, options)
-        print(json.dumps(response))
-        data_table = []
-        for entry in response:
-            output = []
-            output.append(entry["record_id"])
-            output.append(entry["visit_info_age"])
-            subject_studies = []
-            visit_studies = []
-            for i in range(13):
-                field_name = "studyids_studies___" + str(i)
-                if entry.get(field_name) == "1":
-                    subject_studies.append(utils.study_map[str(i)])
-                field_name = "visit_info_studies___" + str(i)
-                if entry.get(field_name) == "1":
-                    visit_studies.append(utils.study_map[str(i)])
-            output.append(",".join(subject_studies))
-            output.append(",".join(visit_studies))
-            data_table.append(output)
-        context["data_table"] = data_table
+    oConnection = RedcapConnection.objects.get(unique_name="main_repo")
+    options = {
+        'forms[1]': "visit_information",
+        'fields[1]': 'record_id',
+        'events[0]': 'all_measures_arm_1',
+    }
+    response = utils.run_request("record", oConnection, options)
+    visits = []
+    for entry in response:
+        if not entry["redcap_repeat_instance"]:
+            continue
+        visit_studies = []
+        for i in range(13):
+            field_name = "visit_info_studies___" + str(i)
+            if entry.get(field_name) == "1":
+                visit_studies.append(utils.study_map[str(i)])
+        entry["visit_info_studies"] = visit_studies
+        oVisit = models.CompletedVisit.objects.filter(record_id=entry["record_id"], instance=int(entry["redcap_repeat_instance"])).first()
+        entry["completed_visit"] = oVisit
+        visits.append(entry)
+    context["visits"] = visits
     return render(request, 'main/home.html', context)
 
 @login_required
@@ -148,6 +137,5 @@ def update_new_visits(request):
                 oCreated.successful = False
                 oCreated.error_message = str(response)
                 oCreated.save()
-            raise Exception("Completed 1 instrument")
     messages.success(request, "update complete")
     return redirect("home")
