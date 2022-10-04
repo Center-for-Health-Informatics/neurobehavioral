@@ -1,3 +1,5 @@
+
+git+https://github.com/Center-for-Health-Informatics/redcap_importer.git@v1.0.3#egg=redcap_importer
 django
 django-crispy-forms
 requests
