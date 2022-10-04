@@ -47,3 +47,20 @@ class CompletedVisit(TimeStampedModel):
 
     def __str__(self):
         return f"record_id {self.record_id}, instance {self.instance}"
+
+class CreatedInstrument(models.Model):
+    """
+    Tracks all the instruments that were created for a visit
+    """
+    visit = models.ForeignKey(CompletedVisit, on_delete=models.CASCADE)
+    instrument_name = models.CharField(max_length=255)
+    instance = models.IntegerField()
+    successful = models.BooleanField(default=True)
+    error_message = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        response = f"record_id {self.visit.record_id}, instrument {self.instrument_name}, instance {self.instance}"
+        if self.successful:
+            return response
+        return "(FAILED) " + response
+

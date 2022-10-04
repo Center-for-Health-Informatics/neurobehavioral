@@ -21,3 +21,8 @@ class CompletedVisitAdmin(admin.ModelAdmin):
     list_display = ("record_id", "instance", "created")
 
 admin.site.register(models.CompletedVisit, CompletedVisitAdmin)
+
+class CreatedInstrumentAdmin(admin.ModelAdmin):
+   pass
+
+admin.site.register(models.CreatedInstrument, CreatedInstrumentAdmin)

@@ -10,31 +10,12 @@ from django.contrib import messages
 from redcap_importer.models import RedcapConnection
 
 from . import models
+from . import utils
 
 
-def run_request(content, oConnection, addl_options={}):
-    addl_options['content'] = content
-    addl_options['token'] = oConnection.get_api_token()
-    addl_options['format'] = 'json'
-    addl_options['returnFormat'] = 'json'
-    return requests.post(oConnection.api_url.url, addl_options).json()
 
-study_map = {
-    "0": "U54 P1",
-    "1": "U54 K23 Ernie",
-    "2": "DDNR K23 Schmitt",
-    "3": "DDNR RO1 UCLA Carlos",
-    "4": "P50",
-    "5": "P50 Long",
-    "6": "P50 Drug",
-    "7": "Hessl RO1",
-    "8": "MRIR",
-    "9": "MRIDD",
-    "10": "NIRS",
-    "11": "BIO",
-    "12": "DDNR",
-    "13": "NIRDD",
-}
+
+
 
 @login_required
 def home(request):
@@ -51,7 +32,7 @@ def home(request):
             'events[0]': 'all_measures_arm_1',
             'events[1]': 'subject_info_arm_1',
         }
-        response = run_request("record", oConnection, options)
+        response = utils.run_request("record", oConnection, options)
         print(json.dumps(response))
         data_table = []
         for entry in response:
@@ -63,10 +44,10 @@ def home(request):
             for i in range(13):
                 field_name = "studyids_studies___" + str(i)
                 if entry.get(field_name) == "1":
-                    subject_studies.append(study_map[str(i)])
+                    subject_studies.append(utils.study_map[str(i)])
                 field_name = "visit_info_studies___" + str(i)
                 if entry.get(field_name) == "1":
-                    visit_studies.append(study_map[str(i)])
+                    visit_studies.append(utils.study_map[str(i)])
             output.append(",".join(subject_studies))
             output.append(",".join(visit_studies))
             data_table.append(output)
@@ -74,7 +55,19 @@ def home(request):
     return render(request, 'main/home.html', context)
 
 @login_required
+def delete_all_created_instruments(request):
+    """
+    Goes through logs of created instruments and attempts to un-create them. Useful for starting
+    over while testing behavior.
+    """
+    if request.method != "POST":
+        return redirect("home")
+
+@login_required
 def update_new_visits(request):
+    """
+    Looks for new visits and creates appropriate instruments in REDCap
+    """
     if request.method != "POST":
         return redirect("home")
     oConnection = RedcapConnection.objects.get(unique_name="main_repo")
@@ -85,7 +78,7 @@ def update_new_visits(request):
         # 'fields[4]': 'visit_info_studies',
         'events[0]': 'all_measures_arm_1',
     }
-    response = run_request("record", oConnection, options)
+    response = utils.run_request("record", oConnection, options)
     dataset = []
     for entry in response:
         # ignore record if no instance value
@@ -115,11 +108,18 @@ def update_new_visits(request):
         output["instruments"] = instruments
         dataset.append(output)
     for entry in dataset:
+        oVisit = models.CompletedVisit(record_id=entry['record_id'], instance=entry['instance'])
+        oVisit.save()
         for oInstrument in entry["instruments"]:
             print(f"create instrument {oInstrument} on record {entry['record_id']}, instance {entry['instance']}")
-            # TODO: actually create in redcap
-            oVisit = models.CompletedVisit(record_id=entry['record_id'], instance=entry['instance'])
-            oVisit.save()
-
+            instance, response = utils.create_instrument(oConnection, oInstrument, entry["record_id"], entry["visit_studies"])
+            oCreated = models.CreatedInstrument(visit=oVisit, instrument_name=oInstrument.instrument_name, instance=instance)
+            if "count" in response and response["count"] == 1:
+                oCreated.save()
+            else:
+                oCreated.successful = False
+                oCreated.error_message = str(response)
+                oCreated.save()
+            raise Exception("Completed 1 instrument")
     messages.success(request, "update complete")
     return redirect("home")
