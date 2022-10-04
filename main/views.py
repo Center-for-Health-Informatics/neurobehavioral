@@ -62,6 +62,34 @@ def delete_all_created_instruments(request):
     """
     if request.method != "POST":
         return redirect("home")
+    oConnection = RedcapConnection.objects.get(unique_name="main_repo")
+    visits_to_delete = []
+    created_to_delete = []
+    # delete from redcap
+    for oVisit in models.CompletedVisit.objects.all():
+        visit_delete_successful = True
+        for oCreated in oVisit.createdinstrument_set.exclude(successful=False):
+            successful = utils.delete_instrument(oConnection, oVisit.record_id, oCreated.instrument_name, oCreated.instance)
+            if successful:
+                created_to_delete.append(oCreated)
+            else:
+                visit_delete_successful = False
+        if visit_delete_successful:
+            visits_to_delete.append(oVisit)
+    # delete from logs
+    for oCreated in created_to_delete:
+        oCreated.delete()
+    for oVisit in visits_to_delete:
+        oVisit.delete()
+    messages.success(request, "rollback complete")
+    return redirect("home")
+
+
+
+
+
+
+
 
 @login_required
 def update_new_visits(request):

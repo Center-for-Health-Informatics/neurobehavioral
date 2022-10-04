@@ -47,6 +47,18 @@ def get_next_instance_number(oConnection, oInstrument, record_id):
                 max_instance = instance
     return max_instance + 1
 
+def delete_instrument(oConnection, record_id, instrument_name, repeat_instance):
+    options = {
+        "action": "delete",
+        "records[0]": str(record_id),
+        "event": "all_measures_arm_1",
+        "instrument": instrument_name,
+        "repeat_instance": repeat_instance,
+    }
+    response = run_request("record", oConnection, options)
+    if str(response) == "1":
+        return True
+    return False
 
 def create_instrument(oConnection, oInstrument, record_id, qStudy):
     instance = get_next_instance_number(oConnection, oInstrument, record_id)

@@ -4,17 +4,26 @@
 
     <h1>home</h1>
 
+    {% comment %}
     <form method="post">
         {% csrf_token %}
         <button type="submit" class="btn btn-success">
             Get visit info
         </button>
     </form>
+    {% endcomment %}
 
     <form method="post" action="{% url 'update_new_visits' %}">
         {% csrf_token %}
         <button type="submit" class="btn btn-success">
             Update new visits in REDCap
+        </button>
+    </form>
+
+    <form method="post" action="{% url 'delete_all_created_instruments' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">
+            Delete all created instruments
         </button>
     </form>
 
