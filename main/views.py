@@ -79,7 +79,6 @@ def update_new_visits(request):
         return redirect("home")
     oConnection = RedcapConnection.objects.get(unique_name="main_repo")
     options = {
-        'fields[0]': 'redcap_repeat_instrument',
         'fields[1]': 'record_id',
         'fields[2]': 'visit_info_age',
         'fields[3]': 'visit_info_date',
