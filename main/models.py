@@ -1,6 +1,12 @@
 from django.db import models
 
 
+class TimeStampedModel(models.Model):
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
 
 class Study(models.Model):
     study_name = models.CharField(max_length=255, unique=True)
@@ -27,3 +33,17 @@ class StudyInstrument(models.Model):
     instrument = models.ForeignKey("Instrument", on_delete=models.CASCADE)
     min_age = models.FloatField(blank=True, null=True, help_text="Leave blank for no min age")
     max_age = models.FloatField(blank=True, null=True, help_text="Leave blank for no max age")
+
+class CompletedVisit(TimeStampedModel):
+    """
+    Tracks which visit records have already been processed
+    """
+    record_id = models.CharField(max_length=255)
+    instance = models.IntegerField()
+
+    class Meta:
+        unique_together = (("record_id", "instance"),)
+        ordering = ["record_id", "instance"]
+
+    def __str__(self):
+        return f"record_id {self.record_id}, instance {self.instance}"

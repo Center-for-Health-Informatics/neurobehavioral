@@ -79,19 +79,27 @@ def update_new_visits(request):
         return redirect("home")
     oConnection = RedcapConnection.objects.get(unique_name="main_repo")
     options = {
+        'forms[1]': 'visit_information',
         'fields[1]': 'record_id',
-        'fields[2]': 'visit_info_age',
-        'fields[3]': 'visit_info_date',
-        'fields[4]': 'visit_info_studies',
+        # 'fields[3]': 'visit_info_date',
+        # 'fields[4]': 'visit_info_studies',
         'events[0]': 'all_measures_arm_1',
     }
     response = run_request("record", oConnection, options)
     dataset = []
     for entry in response:
-        print("nnnnnnnnnn", entry)
+        # ignore record if no instance value
+        if not entry["redcap_repeat_instance"]:
+            continue
+        # don't run already completed ones
+        oCompletedVisit = models.CompletedVisit.objects.filter(record_id=entry["record_id"],
+                instance=entry["redcap_repeat_instance"]).first()
+        if oCompletedVisit:
+            continue
         output = {}
         output["record_id"] = entry["record_id"]
         output["visit_age"] = entry["visit_info_age"]
+        output["instance"] = entry["redcap_repeat_instance"]
         visit_studies = []
         instruments = []
         for oStudy in models.Study.objects.all():
@@ -108,9 +116,10 @@ def update_new_visits(request):
         dataset.append(output)
     for entry in dataset:
         for oInstrument in entry["instruments"]:
-            print(f"create instrument {oInstrument} on record {entry['record_id']}")
+            print(f"create instrument {oInstrument} on record {entry['record_id']}, instance {entry['instance']}")
             # TODO: actually create in redcap
-            # TODO: track what has been created already and don't create agaoin
+            oVisit = models.CompletedVisit(record_id=entry['record_id'], instance=entry['instance'])
+            oVisit.save()
 
     messages.success(request, "update complete")
     return redirect("home")
