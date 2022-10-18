@@ -4,9 +4,13 @@ from . import views
 
 
 urlpatterns = [
-   # path('js/graph_functions.js', views.js_graph_functions, name='js_graph_functions'),
-   # path('myview2/<int:code>', views.myview2, name='myview2'),
-   path('update_new_visits', views.update_new_visits, name='update_new_visits'),
-   path('delete_all_created_instruments', views.delete_all_created_instruments, name='delete_all_created_instruments'),
-   path('', views.home, name='home'),
+    # path('js/graph_functions.js', views.js_graph_functions, name='js_graph_functions'),
+    # path('myview2/<int:code>', views.myview2, name='myview2'),
+
+    path('create_instruments/<int:record_id>/<int:redcap_repeat_instance>', views.create_instruments, name='create_instruments'),
+    path('create_instruments', views.create_instruments, name='create_instruments'),
+
+    path('delete_instruments/<int:record_id>/<int:redcap_repeat_instance>', views.delete_instruments, name='delete_instruments'),
+    path('delete_instruments', views.delete_instruments, name='delete_instruments'),
+    path('', views.home, name='home'),
 ]

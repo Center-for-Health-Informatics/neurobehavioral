@@ -44,44 +44,7 @@ def home(request):
     return render(request, 'main/home.html', context)
 
 @login_required
-def delete_all_created_instruments(request):
-    """
-    Goes through logs of created instruments and attempts to un-create them. Useful for starting
-    over while testing behavior.
-    """
-    if request.method != "POST":
-        return redirect("home")
-    oConnection = RedcapConnection.objects.get(unique_name="main_repo")
-    visits_to_delete = []
-    created_to_delete = []
-    # delete from redcap
-    for oVisit in models.CompletedVisit.objects.all():
-        visit_delete_successful = True
-        for oCreated in oVisit.createdinstrument_set.exclude(successful=False):
-            successful = utils.delete_instrument(oConnection, oVisit.record_id, oCreated.instrument_name, oCreated.instance)
-            if successful:
-                created_to_delete.append(oCreated)
-            else:
-                visit_delete_successful = False
-        if visit_delete_successful:
-            visits_to_delete.append(oVisit)
-    # delete from logs
-    for oCreated in created_to_delete:
-        oCreated.delete()
-    for oVisit in visits_to_delete:
-        oVisit.delete()
-    messages.success(request, "rollback complete")
-    return redirect("home")
-
-
-
-
-
-
-
-
-@login_required
-def update_new_visits(request):
+def create_instruments(request, record_id=None, redcap_repeat_instance=None):
     """
     Looks for new visits and creates appropriate instruments in REDCap
     """
@@ -98,8 +61,12 @@ def update_new_visits(request):
     response = utils.run_request("record", oConnection, options)
     dataset = []
     for entry in response:
-        # ignore record if no instance value
+        # ignore record if no instance value or if we're limiting which visits to run
         if not entry["redcap_repeat_instance"]:
+            continue
+        if record_id and int(entry["record_id"]) != record_id:
+            continue
+        if redcap_repeat_instance and int(entry["redcap_repeat_instance"]) != redcap_repeat_instance:
             continue
         # don't run already completed ones
         oCompletedVisit = models.CompletedVisit.objects.filter(record_id=entry["record_id"],
@@ -139,3 +106,47 @@ def update_new_visits(request):
                 oCreated.save()
     messages.success(request, "update complete")
     return redirect("home")
+
+@login_required
+def delete_instruments(request, record_id=None, redcap_repeat_instance=None):
+    """
+    Goes through logs of created instruments and attempts to un-create them. Useful for starting
+    over while testing behavior.
+    """
+    if request.method != "POST":
+        return redirect("home")
+    oConnection = RedcapConnection.objects.get(unique_name="main_repo")
+    visits_to_delete = []
+    created_to_delete = []
+    # delete from redcap
+    qVisit = models.CompletedVisit.objects.all()
+    if record_id:
+        qVisit = qVisit.filter(record_id=record_id)
+    if redcap_repeat_instance:
+        qVisit = qVisit.filter(instance=redcap_repeat_instance)
+    for oVisit in qVisit:
+        visit_delete_successful = True
+        for oCreated in oVisit.createdinstrument_set.exclude(successful=False):
+            successful = utils.delete_instrument(oConnection, oVisit.record_id, oCreated.instrument_name, oCreated.instance)
+            if successful:
+                created_to_delete.append(oCreated)
+            else:
+                visit_delete_successful = False
+        if visit_delete_successful:
+            visits_to_delete.append(oVisit)
+    # delete from logs
+    for oCreated in created_to_delete:
+        oCreated.delete()
+    for oVisit in visits_to_delete:
+        oVisit.delete()
+    messages.success(request, "rollback complete")
+    return redirect("home")
+
+
+
+
+
+
+
+
+

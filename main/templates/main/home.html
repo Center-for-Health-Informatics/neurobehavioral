@@ -8,14 +8,14 @@
 
 
 
-    <form method="post" action="{% url 'update_new_visits' %}">
+    <form method="post" action="{% url 'create_instruments' %}">
         {% csrf_token %}
         <button type="submit" class="btn btn-success">
             Create instruments for all unprocessed visits
         </button>
     </form>
 
-    <form method="post" action="{% url 'delete_all_created_instruments' %}">
+    <form method="post" action="{% url 'delete_instruments' %}">
         {% csrf_token %}
         <button type="submit" class="btn btn-danger">
             Delete all created instruments
@@ -23,25 +23,27 @@
     </form>
 
     <hr>
+    <h3>Visits</h3>
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>Visit ID</th>
+                <th>Record ID</th>
                 <th>Visit instance</th>
                 <th>Visit Studies</th>
                 <th>Visit Age</th>
                 <th>Visit Group Mem</th>
                 <th>Processed?</th>
                 <th>Created Instrument/Instance #</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
             {% for visit in visits %}
                 <tr>
                     <td>{{ visit.record_id }}</td>
-                    <td>{{ visit.redcap_repeat_instrument }}</td>
-                    <td>{{ visit.visit_info_studies }}</td>
-                    <td>{{ visit.visit_info_age }}</td>
+                    <td>{{ visit.redcap_repeat_instance }}</td>
+                    <td>{{ visit.visit_info_studies|join:", " }}</td>
+                    <td>{{ visit.visit_info_age|floatformat:2 }}</td>
                     <td>{{ visit.visit_info_group_mem }}</td>
                     <td>
                         {% if visit.completed_visit %}
@@ -53,6 +55,23 @@
                             {% for oCreated in visit.completed_visit.createdinstrument_set.all %}
                                 • {{ oCreated.instrument_name }} (#{{ oCreated.instance }})<br>
                             {% endfor %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if visit.completed_visit %}
+                            <form method="post" action="{% url 'delete_instruments' visit.record_id visit.redcap_repeat_instance %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">
+                                    Delete instruments
+                                </button>
+                            </form>
+                        {% else %}
+                            <form method="post" action="{% url 'create_instruments' visit.record_id visit.redcap_repeat_instance %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    Create instruments
+                                </button>
+                            </form>
                         {% endif %}
                     </td>
                 </tr>
