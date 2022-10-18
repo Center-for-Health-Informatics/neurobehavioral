@@ -40,6 +40,9 @@ class Instrument(models.Model):
     def __str__(self):
         return self.instrument_name
 
+    class Meta:
+        ordering = ["instrument_name"]
+
 class StudyInstrument(models.Model):
     study = models.ForeignKey("Study", on_delete=models.CASCADE)
     instrument = models.ForeignKey("Instrument", on_delete=models.CASCADE)

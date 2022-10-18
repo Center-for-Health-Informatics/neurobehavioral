@@ -29,6 +29,13 @@
         </button>
     </form>
 
+    <form method="post" action="{% url 'update_list_of_instruments' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-lg btn-primary">
+            Update List of Instruments
+        </button>
+    </form>
+
     <hr>
     <h3>Visits</h3>
     <table class="table table-striped">
@@ -38,7 +45,7 @@
                 <th>Visit instance</th>
                 <th>Visit Studies</th>
                 <th>Visit Age</th>
-                <th>Visit Group Mem</th>
+                <th>Visit Group</th>
                 <th>Processed?</th>
                 <th>Created Instrument/Instance #</th>
                 <th>Action</th>
@@ -49,9 +56,9 @@
                 <tr>
                     <td>{{ visit.record_id }}</td>
                     <td>{{ visit.redcap_repeat_instance }}</td>
-                    <td>{{ visit.visit_info_studies|join:", " }}</td>
+                    <td>{{ visit.visit_info_studies|join:" | " }}</td>
                     <td>{{ visit.visit_info_age|floatformat:2 }}</td>
-                    <td>{{ visit.visit_info_group_mem }}</td>
+                    <td>{{ visit.group_name }}</td>
                     <td>
                         {% if visit.completed_visit %}
                             YES

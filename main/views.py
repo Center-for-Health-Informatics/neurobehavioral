@@ -35,13 +35,42 @@ def home(request):
         for i in range(13):
             field_name = "visit_info_studies___" + str(i)
             if entry.get(field_name) == "1":
-                visit_studies.append(utils.study_map[str(i)])
+                oStudy = models.Study.objects.filter(study_number=i).first()
+                if oStudy:
+                    visit_studies.append(str(oStudy))
+                else:
+                    visit_studies.append(str(i))
         entry["visit_info_studies"] = visit_studies
+        entry["group_name"] = entry["visit_info_group_mem"]
+        if entry["visit_info_group_mem"]:
+            oGroup = models.Group.objects.filter(group_number=entry["visit_info_group_mem"]).first()
+            if oGroup:
+                entry["group_name"] = str(oGroup)
         oVisit = models.CompletedVisit.objects.filter(record_id=entry["record_id"], instance=int(entry["redcap_repeat_instance"])).first()
         entry["completed_visit"] = oVisit
         visits.append(entry)
     context["visits"] = visits
     return render(request, 'main/home.html', context)
+
+@login_required
+def update_list_of_instruments(request):
+    if request.method != "POST":
+        return redirect("home")
+    oConnection = RedcapConnection.objects.get(unique_name="main_repo")
+
+    # update study list
+    options = {
+        'arms[0]': '1',
+    }
+    response = utils.run_request("formEventMapping", oConnection, options)
+    for entry in response:
+        if entry["unique_event_name"] == "all_measures_arm_1" and entry["form"] != "visit_information":
+            oInstrument, created = models.Instrument.objects.get_or_create(instrument_name=entry["form"])
+    messages.success(request, "update complete")
+    return redirect("home")
+
+
+
 
 @login_required
 def update_visit_info_metadata(request):
