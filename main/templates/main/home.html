@@ -10,15 +10,22 @@
 
     <form method="post" action="{% url 'create_instruments' %}">
         {% csrf_token %}
-        <button type="submit" class="btn btn-success">
-            Create instruments for all unprocessed visits
+        <button type="submit" class="btn btn-lg btn-success">
+            Create instruments for all
         </button>
     </form>
 
     <form method="post" action="{% url 'delete_instruments' %}">
         {% csrf_token %}
-        <button type="submit" class="btn btn-danger">
-            Delete all created instruments
+        <button type="submit" class="btn btn-lg btn-danger">
+            Delete instruments for all
+        </button>
+    </form>
+
+    <form method="post" action="{% url 'update_visit_info_metadata' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-lg btn-primary">
+            Update List of Groups and Studies
         </button>
     </form>
 

@@ -7,6 +7,8 @@ urlpatterns = [
     # path('js/graph_functions.js', views.js_graph_functions, name='js_graph_functions'),
     # path('myview2/<int:code>', views.myview2, name='myview2'),
 
+    path('update_visit_info_metadata', views.update_visit_info_metadata, name='update_visit_info_metadata'),
+
     path('create_instruments/<int:record_id>/<int:redcap_repeat_instance>', views.create_instruments, name='create_instruments'),
     path('create_instruments', views.create_instruments, name='create_instruments'),
 

@@ -44,6 +44,59 @@ def home(request):
     return render(request, 'main/home.html', context)
 
 @login_required
+def update_visit_info_metadata(request):
+    """ Update options for visit_info_studies and visit_info_group_mem """
+    if request.method != "POST":
+        return redirect("home")
+    oConnection = RedcapConnection.objects.get(unique_name="main_repo")
+
+    # update study list
+    options = {
+        'fields[0]': 'visit_info_studies',
+    }
+    response = utils.run_request("metadata", oConnection, options)
+    if len(response) != 1 or not "select_choices_or_calculations" in response[0]:
+        messages.error(request, "Unable to get the list of studies from REDCap")
+    study_str = response[0]["select_choices_or_calculations"]
+    studies = study_str.split(" | ")
+    # set all to missing and then verify which are present
+    for oStudy in models.Study.objects.all():
+        oStudy.missing = True
+        oStudy.save()
+    for study in studies:
+        study_number, study_name = study.split(", ", 1)
+        oStudy, created = models.Study.objects.get_or_create(
+            study_number=int(study_number),
+            study_name=study_name
+        )
+        oStudy.missing = False
+        oStudy.save()
+
+    # update group list
+    options = {
+        'fields[0]': 'visit_info_group_mem',
+    }
+    response = utils.run_request("metadata", oConnection, options)
+    if len(response) != 1 or not "select_choices_or_calculations" in response[0]:
+        messages.error(request, "Unable to get the list of studies from REDCap")
+    group_str = response[0]["select_choices_or_calculations"]
+    groups = group_str.split(" | ")
+    # set all to missing and then verify which are present
+    for oGroup in models.Group.objects.all():
+        oGroup.missing = True
+        oGroup.save()
+    for group in groups:
+        group_number, group_name = group.split(", ", 1)
+        oGroup, created = models.Group.objects.get_or_create(
+            group_number=int(group_number),
+            group_name=group_name
+        )
+        oGroup.missing = False
+        oGroup.save()
+    messages.success(request, "update complete")
+    return redirect("home")
+
+@login_required
 def create_instruments(request, record_id=None, redcap_repeat_instance=None):
     """
     Looks for new visits and creates appropriate instruments in REDCap

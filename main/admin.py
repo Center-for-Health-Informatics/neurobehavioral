@@ -8,9 +8,15 @@ class StudyInstrumentAdmin(admin.StackedInline):
     extra = 1
 
 class StudyAdmin(admin.ModelAdmin):
+    list_display = ["study_number", "study_name", "missing"]
     inlines = [StudyInstrumentAdmin]
 
 admin.site.register(models.Study, StudyAdmin)
+
+class GroupAdmin(admin.ModelAdmin):
+    list_display = ["group_number", "group_name", "missing"]
+
+admin.site.register(models.Group, GroupAdmin)
 
 class InstrumentAdmin(admin.ModelAdmin):
     pass
