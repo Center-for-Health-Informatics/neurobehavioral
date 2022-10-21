@@ -6,11 +6,13 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db.models import ProtectedError
 
 from redcap_importer.models import RedcapConnection
 
 from . import models
 from . import utils
+from . import forms
 
 
 
@@ -50,7 +52,64 @@ def home(request):
         entry["completed_visit"] = oVisit
         visits.append(entry)
     context["visits"] = visits
+    context["current_page"] = "home"
     return render(request, 'main/home.html', context)
+
+@login_required
+def rules(request):
+    qRule = models.InstrumentCreationRule.objects.all()
+    context = {
+        "current_page": "rules",
+        "qObj": qRule,
+    }
+    return render(request, 'main/rules.html', context)
+
+@login_required
+def create_rule(request):
+    if request.method == "POST":
+        form = forms.InstrumentCreationRuleForm(request.POST)
+        if form.is_valid():
+            oObj = form.save()
+            messages.success(request, "Rule '{}' was successfully created.".format(oObj))
+            return redirect("rules")
+    else:
+        form = forms.InstrumentCreationRuleForm()
+    context = {
+        "form": form,
+        "current_page": "rules",
+    }
+    return render(request, 'main/create_rule.html', context)
+
+@login_required
+def edit_rule(request, rule_id):
+    oRule = get_object_or_404(models.InstrumentCreationRule, pk=rule_id)
+    if request.method == "POST":
+        form = forms.InstrumentCreationRuleForm(request.POST, instance=oRule)
+        if form.is_valid():
+            oRule = form.save()
+            messages.success(request, "Rule '{}' was successfully edited.".format(oRule))
+            return redirect("rules")
+    else:
+        form = forms.InstrumentCreationRuleForm(instance=oRule)
+    context = {
+        "form": form,
+        "current_page": "rules",
+    }
+    return render(request, "main/edit_rule.html", context)
+
+@login_required
+def delete_rule(request, rule_id):
+    oRule = get_object_or_404(models.InstrumentCreationRule, pk=rule_id)
+    if request.method == "POST":
+        try:
+            rule_name = str(oRule)
+            oRule.delete()
+            messages.success(request, "Notification '{}' has been deleted.".format(rule_name))
+        except ProtectedError:
+            message = ("Cannot delete this rule because there are other tables "
+                       "referencing it.")
+            messages.error(request, message)
+    return redirect("rules")
 
 @login_required
 def update_list_of_instruments(request):

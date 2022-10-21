@@ -15,5 +15,11 @@ urlpatterns = [
 
     path('delete_instruments/<int:record_id>/<int:redcap_repeat_instance>', views.delete_instruments, name='delete_instruments'),
     path('delete_instruments', views.delete_instruments, name='delete_instruments'),
+
+    path('rules/edit/<int:rule_id>', views.edit_rule, name='edit_rule'),
+    path('rules/delete/<int:rule_id>', views.delete_rule, name='delete_rule'),
+    path('rules/new', views.create_rule, name='create_rule'),
+    path('rules', views.rules, name='rules'),
+
     path('', views.home, name='home'),
 ]

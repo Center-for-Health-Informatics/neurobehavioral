@@ -1,0 +1,32 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'rules' %}">Instrument Creation Rules</a></li>
+    <li class="breadcrumb-item active">Create</li>
+</ol>
+
+
+    <h1>Create new Rule</h1>
+    <hr>
+
+    <div class="row">
+        <div class="col-sm-6 col-sm-offset-1">
+            <form method="post" id="myForm">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <button type="submit" class="btn btn-lg btn-success">
+                    <i class="fa fa-plus" aria-hidden="true"></i> Create Rule
+                </button>
+            </form>
+        </div>
+    </div>
+
+
+
+
+
+
+{% endblock %}

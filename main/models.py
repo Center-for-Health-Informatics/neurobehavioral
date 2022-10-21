@@ -14,7 +14,7 @@ class Study(models.Model):
     missing = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.study_number}: {self.study_name}"
+        return f"{self.study_number} ({self.study_name})"
 
     class Meta:
         verbose_name_plural = "studies"
@@ -26,7 +26,7 @@ class Group(models.Model):
     missing = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.group_number}: {self.group_name}"
+        return f"{self.group_number} ({self.group_name})"
 
     class Meta:
         ordering = ["group_number"]
@@ -54,10 +54,10 @@ class InstrumentCreationRule(models.Model):
     group = models.ForeignKey("Group", on_delete=models.PROTECT, blank=True, null=True, help_text="Leave blank for all groups")
     min_age = models.FloatField(blank=True, null=True, help_text="Leave blank for no min age")
     max_age = models.FloatField(blank=True, null=True, help_text="Leave blank for no max age")
-    instruments = models.ManyToManyField("Instrument", blank=True)
+    instruments = models.ManyToManyField("Instrument", blank=True, help_text="Hold ctrl to select multiple")
 
     def __str__(self):
-        return f"rule #{self.id} (study: {self.study})"
+        return f"rule #{self.id} - study: {self.study}"
 
     class Meta:
         ordering = ["study__study_name", "id"]
@@ -67,6 +67,20 @@ class InstrumentCreationRule(models.Model):
         for oInstrument in self.instruments.all():
             list.append(oInstrument.instrument_name)
         return ", ".join(list)
+
+    def describe_rule(self):
+        group_desc = ""
+        min_age_desc = ""
+        max_age_desc = ""
+        if self.group:
+            group_desc = f" and group is {self.group}"
+        if self.min_age:
+            min_age_desc = f" and age >= {self.min_age}"
+        if self.max_age:
+            max_age_desc = f" and age <= {self.max_age}"
+        desc = f"if study is {self.study}{group_desc}{min_age_desc}{max_age_desc}"
+        return desc
+
 
 
 
