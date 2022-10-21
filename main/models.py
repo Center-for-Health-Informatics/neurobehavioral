@@ -49,6 +49,30 @@ class StudyInstrument(models.Model):
     min_age = models.FloatField(blank=True, null=True, help_text="Leave blank for no min age")
     max_age = models.FloatField(blank=True, null=True, help_text="Leave blank for no max age")
 
+class InstrumentCreationRule(models.Model):
+    study = models.ForeignKey("Study", on_delete=models.CASCADE)
+    group = models.ForeignKey("Group", on_delete=models.PROTECT, blank=True, null=True, help_text="Leave blank for all groups")
+    min_age = models.FloatField(blank=True, null=True, help_text="Leave blank for no min age")
+    max_age = models.FloatField(blank=True, null=True, help_text="Leave blank for no max age")
+    instruments = models.ManyToManyField("Instrument", blank=True)
+
+    def __str__(self):
+        return f"rule #{self.id} (study: {self.study})"
+
+    class Meta:
+        ordering = ["study__study_name", "id"]
+
+    def list_instruments(self):
+        list = []
+        for oInstrument in self.instruments.all():
+            list.append(oInstrument.instrument_name)
+        return ", ".join(list)
+
+
+
+
+
+
 class CompletedVisit(TimeStampedModel):
     """
     Tracks which visit records have already been processed
