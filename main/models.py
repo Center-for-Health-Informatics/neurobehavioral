@@ -43,11 +43,11 @@ class Instrument(models.Model):
     class Meta:
         ordering = ["instrument_name"]
 
-class StudyInstrument(models.Model):
-    study = models.ForeignKey("Study", on_delete=models.CASCADE)
-    instrument = models.ForeignKey("Instrument", on_delete=models.CASCADE)
-    min_age = models.FloatField(blank=True, null=True, help_text="Leave blank for no min age")
-    max_age = models.FloatField(blank=True, null=True, help_text="Leave blank for no max age")
+# class StudyInstrument(models.Model):
+#     study = models.ForeignKey("Study", on_delete=models.CASCADE)
+#     instrument = models.ForeignKey("Instrument", on_delete=models.CASCADE)
+#     min_age = models.FloatField(blank=True, null=True, help_text="Leave blank for no min age")
+#     max_age = models.FloatField(blank=True, null=True, help_text="Leave blank for no max age")
 
 class InstrumentCreationRule(models.Model):
     study = models.ForeignKey("Study", on_delete=models.CASCADE)

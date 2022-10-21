@@ -218,17 +218,26 @@ def create_instruments(request, record_id=None, redcap_repeat_instance=None):
         output["record_id"] = entry["record_id"]
         output["visit_age"] = entry["visit_info_age"]
         output["instance"] = entry["redcap_repeat_instance"]
+        output["visit_group"] = entry["visit_info_group_mem"]
         visit_studies = []
         instruments = []
         for oStudy in models.Study.objects.all():
             field_name = "visit_info_studies___" + str(oStudy.study_number)
             if entry.get(field_name) == "1":
                 visit_studies.append(oStudy)
-                for oStudyInstrument in oStudy.studyinstrument_set.all():
-                    # TODO: also need to check age
-                    oInstrument = oStudyInstrument.instrument
-                    if oInstrument not in instruments:
-                        instruments.append(oInstrument)
+                for oRule in oStudy.instrumentcreationrule_set.all():
+                    if output["visit_age"]:
+                        if oRule.min_age and float(output["visit_age"]) <= oRule.min_age:
+                            continue
+                        if oRule.max_age and float(output["visit_age"]) >= oRule.max_age:
+                            continue
+                    if output["visit_group"] and oRule.group:
+                        if int(output["visit_group"]) != oRule.group.group_number:
+                            continue
+                    qInstrument = oRule.instruments.all()
+                    for oInstrument in qInstrument:
+                        if oInstrument not in instruments:
+                            instruments.append(oInstrument)
         output["visit_studies"] = visit_studies
         output["instruments"] = instruments
         dataset.append(output)

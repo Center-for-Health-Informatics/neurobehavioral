@@ -4,7 +4,7 @@
 
     <h1>Test System</h1>
     <div class="well">
-        This tool interacts with the REDCap Neurobehavioral Repository copy. Use it to verify that Instrument creation
+        This tool interacts with the REDCap Neurobehavioral Repository Copy. Use it to test that Instrument creation
         is working as expected.
     </div>
     <hr>
@@ -72,6 +72,8 @@
                         {% if visit.completed_visit %}
                             {% for oCreated in visit.completed_visit.createdinstrument_set.all %}
                                 • {{ oCreated.instrument_name }} (#{{ oCreated.instance }})<br>
+                            {% empty %}
+                                <span class="text-muted">None</span>
                             {% endfor %}
                         {% endif %}
                     </td>

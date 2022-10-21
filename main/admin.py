@@ -3,10 +3,6 @@ from django.contrib import admin
 from . import models
 
 
-class StudyInstrumentAdmin(admin.StackedInline):
-    model = models.StudyInstrument
-    extra = 1
-
 class InstrumentCreationRuleAdmin(admin.ModelAdmin):
     list_display = ["study", "group", "min_age", "max_age", "list_instruments"]
     list_filter = ["study"]
@@ -15,7 +11,6 @@ admin.site.register(models.InstrumentCreationRule, InstrumentCreationRuleAdmin)
 
 class StudyAdmin(admin.ModelAdmin):
     list_display = ["study_number", "study_name", "missing"]
-    inlines = [StudyInstrumentAdmin]
 
 admin.site.register(models.Study, StudyAdmin)
 
