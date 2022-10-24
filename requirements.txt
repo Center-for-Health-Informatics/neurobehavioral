@@ -1,5 +1,5 @@
 
-git+https://github.com/Center-for-Health-Informatics/redcap_importer.git@v1.0.3#egg=redcap_importer
-django
+git+https://github.com/Center-for-Health-Informatics/redcap_importer.git@v1.0.4#egg=redcap_importer
+django >= 3.0
 django-crispy-forms
 requests
