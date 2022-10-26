@@ -10,9 +10,33 @@
 
     <h1>Instrument Creation Rules</h1>
     <hr>
+    <div class="well">
+
+        <p>
+            The list of study options comes from <code>visit_information.visit_info_studies</code> in the REDCap data dictionary.<br>
+            The list of group options comes from <code>visit_information.visit_info_group_mem</code> in the REDCap data dictionary.<br>
+            The list of instrument options includes any instrument associated with the "All Measures" event (except <code>visit_information</code>).
+        </p>
+
+        <form method="post" action="{% url 'update_visit_info_metadata' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-primary">
+                Update List of Groups and Studies from REDCap
+            </button>
+        </form>
+
+        <form method="post" action="{% url 'update_list_of_instruments' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-primary">
+                Update List of Instruments from REDCap
+            </button>
+        </form>
+    </div>
+
+    <hr>
 
 <table class="table">
-    <thead>
+    <thead class="thead-light">
         <tr>
             <th>Study</th>
             <th>Rule ID</th>

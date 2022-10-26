@@ -19,7 +19,7 @@
     <ul class="navbar-nav mr-auto">
 	    <li class="nav-item {% if current_page == 'home' %}active{% endif %}">
 	    	<a class="nav-link" href="{% url 'home' %}">
-	        	  Test System
+	        	  Test Rules
 	        	  {% if current_page == 'home' %}<span class="sr-only">(current)</span>{% endif %}
 	          </a>
 	    </li>
@@ -42,6 +42,7 @@
 		          {% if user.is_staff %}
 		          	<a class="dropdown-item" href="{% url 'admin:index' %}">Admin Backend</a>
 		          {% endif %}
+                  <a class="dropdown-item" href="{% url 'user_manager:logout' %}">Logout</a>
 		        </div>
 		      </li>
     	{% endif %}

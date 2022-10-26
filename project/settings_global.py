@@ -147,7 +147,7 @@ LOGIN_URL = '/user_manager/login'
 LOGIN_URL_FOR_LINK = '/user_manager/login'
 LOGOUT_URL_FOR_LINK = '/user_manager/logout'
 
-SITE_TITLE = 'My Website'
+SITE_TITLE = 'Neurobehavioral REDCap Tool'
 SITE_CONTACT_EMAIL = 'meinkejf@ucmail.uc.edu'
 
 

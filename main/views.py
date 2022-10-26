@@ -126,7 +126,7 @@ def update_list_of_instruments(request):
         if entry["unique_event_name"] == "all_measures_arm_1" and entry["form"] != "visit_information":
             oInstrument, created = models.Instrument.objects.get_or_create(instrument_name=entry["form"])
     messages.success(request, "update complete")
-    return redirect("home")
+    return redirect("rules")
 
 
 
@@ -182,7 +182,7 @@ def update_visit_info_metadata(request):
         oGroup.missing = False
         oGroup.save()
     messages.success(request, "update complete")
-    return redirect("home")
+    return redirect("rules")
 
 @login_required
 def create_instruments(request, record_id=None, redcap_repeat_instance=None):

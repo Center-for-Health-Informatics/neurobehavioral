@@ -2,9 +2,11 @@
 
 {% block content %}
 
-    <h1>Test System</h1>
-    <div class="well">
-        This tool interacts with the REDCap Neurobehavioral Repository Copy. Use it to test that Instrument creation
+    <h1>Test Rules</h1>
+    <hr>
+    <div class="alert alert-info">
+        This tool interacts with the REDCap Neurobehavioral Repository Copy. It will <strong>not</strong>
+        affect the production REDCap project. Use it to test that Instrument creation
         is working as expected.
     </div>
     <hr>
@@ -26,24 +28,12 @@
         </button>
     </form>
 
-    <form method="post" action="{% url 'update_visit_info_metadata' %}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-lg btn-primary">
-            Update List of Groups and Studies
-        </button>
-    </form>
 
-    <form method="post" action="{% url 'update_list_of_instruments' %}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-lg btn-primary">
-            Update List of Instruments
-        </button>
-    </form>
 
     <hr>
-    <h3>Visits</h3>
+    <h3>Visit Information Records (coming from REDCap Copy)</h3>
     <table class="table table-striped">
-        <thead>
+        <thead class="thead-light">
             <tr>
                 <th>Record ID</th>
                 <th>Visit instance</th>
