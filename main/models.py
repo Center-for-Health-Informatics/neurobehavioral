@@ -36,6 +36,8 @@ class Instrument(models.Model):
     instrument_name = models.CharField(max_length=255, unique=True)
     # optionally include the label - i.e. the REDCap display name
     instrument_label = models.TextField(blank=True, null=True)
+    instrument_field = models.CharField(max_length=255,
+        help_text="An API record import must include at least one field, even if it's empty")
 
     def __str__(self):
         return self.instrument_name

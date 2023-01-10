@@ -124,10 +124,27 @@ def update_list_of_instruments(request):
     response = utils.run_request("formEventMapping", oConnection, options)
     for entry in response:
         if entry["unique_event_name"] == "all_measures_arm_1" and entry["form"] != "visit_information":
-            oInstrument, created = models.Instrument.objects.get_or_create(instrument_name=entry["form"])
+            field_name = get_random_field(entry["form"])
+            # print("fn", entry["form"], field_name)
+            oInstrument = models.Instrument.objects.filter(instrument_name=entry["form"]).first()
+            if not oInstrument:
+                oInstrument = models.Instrument(instrument_name=entry["form"])
+            oInstrument.instrument_field = field_name
+            oInstrument.save()
     messages.success(request, "update complete")
     return redirect("rules")
 
+def get_random_field(instrument_name):
+    oConnection = RedcapConnection.objects.get(unique_name="main_repo")
+    options = {
+        'forms[0]': instrument_name,
+    }
+    response = utils.run_request("metadata", oConnection, options)
+    for entry in response:
+        if entry["field_type"] != "descriptive":
+            field_name = entry["field_name"]
+            return field_name
+    raise ValueError(f"couldn't find a field for instrument {instrument_name}")
 
 
 
@@ -247,6 +264,7 @@ def create_instruments(request, record_id=None, redcap_repeat_instance=None):
         for oInstrument in entry["instruments"]:
             print(f"create instrument {oInstrument} on record {entry['record_id']}, instance {entry['instance']}")
             instance, response = utils.create_instrument(oConnection, oInstrument, entry["record_id"], entry["visit_studies"])
+            # print(response)
             oCreated = models.CreatedInstrument(visit=oVisit, instrument_name=oInstrument.instrument_name, instance=instance)
             if "count" in response and response["count"] == 1:
                 oCreated.save()

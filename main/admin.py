@@ -20,7 +20,7 @@ class GroupAdmin(admin.ModelAdmin):
 admin.site.register(models.Group, GroupAdmin)
 
 class InstrumentAdmin(admin.ModelAdmin):
-    pass
+    list_display = ["instrument_name", "instrument_field"]
 
 admin.site.register(models.Instrument, InstrumentAdmin)
 

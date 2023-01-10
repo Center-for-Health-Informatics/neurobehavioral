@@ -3,11 +3,14 @@ import requests
 import json
 
 
-def run_request(content, oConnection, addl_options={}):
+def run_request(content, oConnection, addl_options=None):
+    if addl_options is None:
+        addl_options = {}
     addl_options['content'] = content
     addl_options['token'] = oConnection.get_api_token()
     addl_options['format'] = 'json'
     addl_options['returnFormat'] = 'json'
+    # print("query", addl_options)
     return requests.post(oConnection.api_url.url, addl_options).json()
 
 def get_next_instance_number(oConnection, oInstrument, record_id):
@@ -50,6 +53,7 @@ def create_instrument(oConnection, oInstrument, record_id, qStudy):
         "redcap_event_name": "all_measures_arm_1",
         "redcap_repeat_instrument": oInstrument.instrument_name,
         "redcap_repeat_instance": str(instance),
+        # "redcap_repeat_instance": "new",
     }
     upload_data = [data]
     upload_data = json.dumps(upload_data)
