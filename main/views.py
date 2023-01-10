@@ -142,8 +142,13 @@ def get_random_field(instrument_name):
     response = utils.run_request("metadata", oConnection, options)
     for entry in response:
         if entry["field_type"] != "descriptive":
-            field_name = entry["field_name"]
-            return field_name
+            # some fields don't work and I don't know why
+            # get error: The following fields were not found in the project as real data fields
+            # so I'm just excluding those fields by name
+            if entry["field_name"] not in ["ados_studies"]:
+                # print("entry", entry)
+                field_name = entry["field_name"]
+                return field_name
     raise ValueError(f"couldn't find a field for instrument {instrument_name}")
 
 
@@ -264,14 +269,15 @@ def create_instruments(request, record_id=None, redcap_repeat_instance=None):
         for oInstrument in entry["instruments"]:
             print(f"create instrument {oInstrument} on record {entry['record_id']}, instance {entry['instance']}")
             instance, response = utils.create_instrument(oConnection, oInstrument, entry["record_id"], entry["visit_studies"])
-            # print(response)
+            # print("resp", response)
             oCreated = models.CreatedInstrument(visit=oVisit, instrument_name=oInstrument.instrument_name, instance=instance)
             if "count" in response and response["count"] == 1:
                 oCreated.save()
             else:
-                oCreated.successful = False
-                oCreated.error_message = str(response)
-                oCreated.save()
+                record_id = entry['record_id']
+                inst = entry['instance']
+                instr = oInstrument.instrument_name
+                messages.error(request, f"record_id {record_id} visit instance {inst} failed to create instrument {instr}: {response}")
     messages.success(request, "update complete")
     return redirect("home")
 

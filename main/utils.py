@@ -54,6 +54,8 @@ def create_instrument(oConnection, oInstrument, record_id, qStudy):
         "redcap_repeat_instrument": oInstrument.instrument_name,
         "redcap_repeat_instance": str(instance),
         # "redcap_repeat_instance": "new",
+        # we need to define at least one field from the instrument or we'll get a cryptic error
+        oInstrument.instrument_field: "",
     }
     upload_data = [data]
     upload_data = json.dumps(upload_data)
