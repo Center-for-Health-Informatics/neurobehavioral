@@ -46,7 +46,7 @@ def delete_instrument(oConnection, record_id, instrument_name, repeat_instance):
         return True
     return False
 
-def create_instrument(oConnection, oInstrument, record_id, qStudy):
+def create_instrument(oConnection, oInstrument, record_id, visit_date):
     instance = get_next_instance_number(oConnection, oInstrument, record_id)
     data = {
         "record_id": str(record_id),
@@ -55,7 +55,7 @@ def create_instrument(oConnection, oInstrument, record_id, qStudy):
         "redcap_repeat_instance": str(instance),
         # "redcap_repeat_instance": "new",
         # we need to define at least one field from the instrument or we'll get a cryptic error
-        oInstrument.instrument_field: "",
+        oInstrument.instrument_field: str(visit_date),
     }
     upload_data = [data]
     upload_data = json.dumps(upload_data)

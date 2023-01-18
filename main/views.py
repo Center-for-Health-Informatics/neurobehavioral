@@ -1,5 +1,6 @@
 import requests
 import json
+import datetime
 
 from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponse, HttpResponseRedirect
@@ -125,6 +126,9 @@ def update_list_of_instruments(request):
     for entry in response:
         if entry["unique_event_name"] == "all_measures_arm_1" and entry["form"] != "visit_information":
             field_name = get_random_field(entry["form"])
+            if field_name is None:
+                messages.error(request, f"no visit date field found for instrument {entry['form']}")
+                continue
             # print("fn", entry["form"], field_name)
             oInstrument = models.Instrument.objects.filter(instrument_name=entry["form"]).first()
             if not oInstrument:
@@ -141,15 +145,11 @@ def get_random_field(instrument_name):
     }
     response = utils.run_request("metadata", oConnection, options)
     for entry in response:
-        if entry["field_type"] != "descriptive":
-            # some fields don't work and I don't know why
-            # get error: The following fields were not found in the project as real data fields
-            # so I'm just excluding those fields by name
-            if entry["field_name"] not in ["ados_studies"]:
-                # print("entry", entry)
-                field_name = entry["field_name"]
-                return field_name
-    raise ValueError(f"couldn't find a field for instrument {instrument_name}")
+        if "visit_date" in entry["field_name"]:
+            field_name = entry["field_name"]
+            return field_name
+    return None
+    # raise ValueError(f"couldn't find a field for instrument {instrument_name}")
 
 
 
@@ -241,6 +241,9 @@ def create_instruments(request, record_id=None, redcap_repeat_instance=None):
         output["visit_age"] = entry["visit_info_age"]
         output["instance"] = entry["redcap_repeat_instance"]
         output["visit_group"] = entry["visit_info_group_mem"]
+        output["visit_date"] = entry.get("visit_date")
+        if not output["visit_date"]:
+            output["visit_date"] = datetime.date(1970, 1, 1)
         visit_studies = []
         instruments = []
         for oStudy in models.Study.objects.all():
@@ -264,11 +267,11 @@ def create_instruments(request, record_id=None, redcap_repeat_instance=None):
         output["instruments"] = instruments
         dataset.append(output)
     for entry in dataset:
-        oVisit = models.CompletedVisit(record_id=entry['record_id'], instance=entry['instance'])
+        oVisit = models.CompletedVisit(record_id=entry['record_id'], instance=entry['instance'], visit_date=entry["visit_date"])
         oVisit.save()
         for oInstrument in entry["instruments"]:
-            print(f"create instrument {oInstrument} on record {entry['record_id']}, instance {entry['instance']}")
-            instance, response = utils.create_instrument(oConnection, oInstrument, entry["record_id"], entry["visit_studies"])
+            # print(f"create instrument {oInstrument} on record {entry['record_id']}, instance {entry['instance']}")
+            instance, response = utils.create_instrument(oConnection, oInstrument, entry["record_id"], entry["visit_date"])
             # print("resp", response)
             oCreated = models.CreatedInstrument(visit=oVisit, instrument_name=oInstrument.instrument_name, instance=instance)
             if "count" in response and response["count"] == 1:
