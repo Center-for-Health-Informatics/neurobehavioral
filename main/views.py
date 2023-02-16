@@ -241,7 +241,7 @@ def create_instruments(request, record_id=None, redcap_repeat_instance=None):
         output["visit_age"] = entry["visit_info_age"]
         output["instance"] = entry["redcap_repeat_instance"]
         output["visit_group"] = entry["visit_info_group_mem"]
-        output["visit_date"] = entry.get("visit_date")
+        output["visit_date"] = entry.get("visit_info_date")
         if not output["visit_date"]:
             output["visit_date"] = datetime.date(1970, 1, 1)
         visit_studies = []

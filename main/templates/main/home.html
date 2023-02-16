@@ -37,6 +37,7 @@
             <tr>
                 <th>Record ID</th>
                 <th>Visit instance</th>
+                <th>Visit Date</th>
                 <th>Visit Studies</th>
                 <th>Visit Age</th>
                 <th>Visit Group</th>
@@ -50,6 +51,7 @@
                 <tr>
                     <td>{{ visit.record_id }}</td>
                     <td>{{ visit.redcap_repeat_instance }}</td>
+                    <td>{{ visit.visit_info_date }}</td>
                     <td>{{ visit.visit_info_studies|join:" | " }}</td>
                     <td>{{ visit.visit_info_age|floatformat:2 }}</td>
                     <td>{{ visit.group_name }}</td>
