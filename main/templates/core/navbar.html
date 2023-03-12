@@ -17,16 +17,16 @@
   
   
     <ul class="navbar-nav mr-auto">
-	    <li class="nav-item {% if current_page == 'home' %}active{% endif %}">
-	    	<a class="nav-link" href="{% url 'home' %}">
-	        	  Test Rules
-	        	  {% if current_page == 'home' %}<span class="sr-only">(current)</span>{% endif %}
+        <li class="nav-item {% if current_page == 'manage_rules' %}active{% endif %}">
+	    	<a class="nav-link" href="{% url 'manage_rules' %}">
+	        	  Manage Rules
+	        	  {% if current_page == 'manage_rules' %}<span class="sr-only">(current)</span>{% endif %}
 	          </a>
 	    </li>
-        <li class="nav-item {% if current_page == 'rules' %}active{% endif %}">
-	    	<a class="nav-link" href="{% url 'rules' %}">
-	        	  Manage Rules
-	        	  {% if current_page == 'rules' %}<span class="sr-only">(current)</span>{% endif %}
+	    <li class="nav-item {% if current_page == 'test_rules' %}active{% endif %}">
+	    	<a class="nav-link" href="{% url 'test_rules' %}">
+	        	  Test Rules
+	        	  {% if current_page == 'test_rules' %}<span class="sr-only">(current)</span>{% endif %}
 	          </a>
 	    </li>
     </ul>
@@ -86,4 +86,16 @@
 	{% endcomment %}
   </div>
 </nav>
+
+
+{% if INCLUDE_INFOBAR %}
+	    <div id="include-infobar" class="infobar-{{INCLUDE_INFOBAR_TYPE}}">
+	    	{% if INCLUDE_INFOBAR_TYPE == 'danger' %}
+	    		<i class="fas fa-exclamation-triangle"></i>
+	    	{% else %}
+	    		<i class="fa fa-info-circle" aria-hidden="true"></i>
+	    	{% endif %}
+	    	{{ INCLUDE_INFOBAR|safe }}
+	    </div>
+{% endif %}
 

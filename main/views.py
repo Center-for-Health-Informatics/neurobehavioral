@@ -17,11 +17,13 @@ from . import forms
 
 
 
-
+@login_required
+def home(request):
+    return redirect("manage_rules")
 
 
 @login_required
-def home(request):
+def test_rules(request):
     context = {}
     oConnection = RedcapConnection.objects.get(unique_name="main_repo")
     options = {
@@ -53,17 +55,17 @@ def home(request):
         entry["completed_visit"] = oVisit
         visits.append(entry)
     context["visits"] = visits
-    context["current_page"] = "home"
-    return render(request, 'main/home.html', context)
+    context["current_page"] = "test_rules"
+    return render(request, 'main/test_rules.html', context)
 
 @login_required
-def rules(request):
+def manage_rules(request):
     qRule = models.InstrumentCreationRule.objects.all()
     context = {
-        "current_page": "rules",
+        "current_page": "manage_rules",
         "qObj": qRule,
     }
-    return render(request, 'main/rules.html', context)
+    return render(request, 'main/manage_rules.html', context)
 
 @login_required
 def create_rule(request):
@@ -72,7 +74,7 @@ def create_rule(request):
         if form.is_valid():
             oObj = form.save()
             messages.success(request, "Rule '{}' was successfully created.".format(oObj))
-            return redirect("rules")
+            return redirect("manage_rules")
     else:
         form = forms.InstrumentCreationRuleForm()
     context = {
@@ -89,7 +91,7 @@ def edit_rule(request, rule_id):
         if form.is_valid():
             oRule = form.save()
             messages.success(request, "Rule '{}' was successfully edited.".format(oRule))
-            return redirect("rules")
+            return redirect("manage_rules")
     else:
         form = forms.InstrumentCreationRuleForm(instance=oRule)
     context = {
@@ -110,12 +112,12 @@ def delete_rule(request, rule_id):
             message = ("Cannot delete this rule because there are other tables "
                        "referencing it.")
             messages.error(request, message)
-    return redirect("rules")
+    return redirect("manage_rules")
 
 @login_required
 def update_list_of_instruments(request):
     if request.method != "POST":
-        return redirect("home")
+        return redirect("manage_rules")
     oConnection = RedcapConnection.objects.get(unique_name="main_repo")
 
     # update study list
@@ -136,7 +138,7 @@ def update_list_of_instruments(request):
             oInstrument.instrument_field = field_name
             oInstrument.save()
     messages.success(request, "update complete")
-    return redirect("rules")
+    return redirect("manage_rules")
 
 def get_random_field(instrument_name):
     oConnection = RedcapConnection.objects.get(unique_name="main_repo")
@@ -157,7 +159,7 @@ def get_random_field(instrument_name):
 def update_visit_info_metadata(request):
     """ Update options for visit_info_studies and visit_info_group_mem """
     if request.method != "POST":
-        return redirect("home")
+        return redirect("manage_rules")
     oConnection = RedcapConnection.objects.get(unique_name="main_repo")
 
     # update study list
@@ -204,7 +206,7 @@ def update_visit_info_metadata(request):
         oGroup.missing = False
         oGroup.save()
     messages.success(request, "update complete")
-    return redirect("rules")
+    return redirect("manage_rules")
 
 @login_required
 def create_instruments(request, record_id=None, redcap_repeat_instance=None):
@@ -212,7 +214,7 @@ def create_instruments(request, record_id=None, redcap_repeat_instance=None):
     Looks for new visits and creates appropriate instruments in REDCap
     """
     if request.method != "POST":
-        return redirect("home")
+        return redirect("test_rules")
     oConnection = RedcapConnection.objects.get(unique_name="main_repo")
     options = {
         'forms[1]': 'visit_information',
@@ -282,7 +284,7 @@ def create_instruments(request, record_id=None, redcap_repeat_instance=None):
                 instr = oInstrument.instrument_name
                 messages.error(request, f"record_id {record_id} visit instance {inst} failed to create instrument {instr}: {response}")
     messages.success(request, "update complete")
-    return redirect("home")
+    return redirect("test_rules")
 
 @login_required
 def delete_instruments(request, record_id=None, redcap_repeat_instance=None):
@@ -291,7 +293,7 @@ def delete_instruments(request, record_id=None, redcap_repeat_instance=None):
     over while testing behavior.
     """
     if request.method != "POST":
-        return redirect("home")
+        return redirect("test_rules")
     oConnection = RedcapConnection.objects.get(unique_name="main_repo")
     visits_to_delete = []
     created_to_delete = []
@@ -317,7 +319,7 @@ def delete_instruments(request, record_id=None, redcap_repeat_instance=None):
     for oVisit in visits_to_delete:
         oVisit.delete()
     messages.success(request, "rollback complete")
-    return redirect("home")
+    return redirect("test_rules")
 
 
 

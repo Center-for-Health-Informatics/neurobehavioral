@@ -69,6 +69,34 @@ ul {
 	margin-left: 0;
 	padding-left: 20px;
 }
+
+#include-infobar {
+	color:white;
+	text-align:center;
+	height: 30px;
+	max-height: 30px;
+	font-size: 1.2em;
+	padding-top:2px;
+	font-weight: bold;
+	margin-top: -20px;
+	margin-bottom: 20px;
+}
+
+.infobar-info {
+	background-color:#29abe0;
+}
+
+.infobar-warning {
+	background-color:#f47c3c;
+}
+
+.infobar-danger {
+	background-color:#d9534f;
+}
+
+#include-infobar a {
+	color:white;
+}
    
    
    

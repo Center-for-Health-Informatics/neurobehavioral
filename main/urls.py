@@ -19,7 +19,9 @@ urlpatterns = [
     path('rules/edit/<int:rule_id>', views.edit_rule, name='edit_rule'),
     path('rules/delete/<int:rule_id>', views.delete_rule, name='delete_rule'),
     path('rules/new', views.create_rule, name='create_rule'),
-    path('rules', views.rules, name='rules'),
+    path('rules', views.manage_rules, name='manage_rules'),
+
+    path('test_rules', views.test_rules, name='test_rules'),
 
     path('', views.home, name='home'),
 ]
