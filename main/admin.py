@@ -25,7 +25,7 @@ class InstrumentAdmin(admin.ModelAdmin):
 admin.site.register(models.Instrument, InstrumentAdmin)
 
 class CompletedVisitAdmin(admin.ModelAdmin):
-    list_display = ("record_id", "instance", "created")
+    list_display = ("record_id", "instance", "created", "ignore")
 
 admin.site.register(models.CompletedVisit, CompletedVisitAdmin)
 

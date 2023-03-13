@@ -96,6 +96,7 @@ class CompletedVisit(TimeStampedModel):
     record_id = models.CharField(max_length=255)
     instance = models.IntegerField()
     visit_date = models.DateField(blank=True, null=True)
+    ignore = models.BooleanField(default=False, help_text="don't create instruments for this visit")
 
     class Meta:
         unique_together = (("record_id", "instance"),)

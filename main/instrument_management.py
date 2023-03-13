@@ -8,14 +8,22 @@ from . import models
 
 
 def create_instruments_for_one_visit(record_id, redcap_repeat_instance):
-    response = _create_instruments(record_id, redcap_repeat_instance)
+    response = _create_or_ignore_instruments(record_id, redcap_repeat_instance)
     return response
 
 def create_instruments_for_all_incomplete():
-    response = _create_instruments()
+    response = _create_or_ignore_instruments()
     return response
 
-def _create_instruments(record_id=None, redcap_repeat_instance=None):
+def ignore_instruments_for_one_visit(record_id, redcap_repeat_instance):
+    response = _create_or_ignore_instruments(record_id, redcap_repeat_instance, ignore=True)
+    return response
+
+def ignore_instruments_for_all_incomplete():
+    response = _create_or_ignore_instruments(ignore=True)
+    return response
+
+def _create_or_ignore_instruments(record_id=None, redcap_repeat_instance=None, ignore=False):
     """
     Generates instruments for any visits that haven't been run or ignored yet. Can do one
     specific visit by specifying record_id and redcap_repeat_instance.
@@ -44,13 +52,26 @@ def _create_instruments(record_id=None, redcap_repeat_instance=None):
             entry["redcap_repeat_instance"]) != redcap_repeat_instance:
             continue
         output = _determine_instruments_for_one_visit(entry)
-        dataset.append(output)
+        if output:
+            dataset.append(output)
     for entry in dataset:
-        new_errors = _generate_instruments_for_one_visit(entry)
-        if new_errors:
-            errors = errors + new_errors
+        if ignore:
+            _ignore_one_visit(entry)
+        else:
+            new_errors = _generate_instruments_for_one_visit(entry)
+            if new_errors:
+                errors = errors + new_errors
     return errors
 
+
+def _ignore_one_visit(entry):
+    """
+    Creates a CompletedVisit entry flagged with ignore=True, and doesn't create any instruments
+    for it.
+    """
+    oVisit = models.CompletedVisit(record_id=entry['record_id'], instance=entry['instance'],
+                                   visit_date=entry["visit_date"], ignore=True)
+    oVisit.save()
 
 def _generate_instruments_for_one_visit(entry):
     """

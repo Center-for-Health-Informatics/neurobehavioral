@@ -17,14 +17,21 @@
     <form method="post" action="{% url 'create_instruments' %}">
         {% csrf_token %}
         <button type="submit" class="btn btn-lg btn-success">
-            Create instruments for all
+            Create instruments for all incomplete
+        </button>
+    </form>
+
+    <form method="post" action="{% url 'ignore_visits' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-lg btn-warning">
+            Flag all incomplete as "Ignore"
         </button>
     </form>
 
     <form method="post" action="{% url 'delete_instruments' %}">
         {% csrf_token %}
         <button type="submit" class="btn btn-lg btn-danger">
-            Delete instruments for all
+            Reset all (delete instruments or stop ignoring)
         </button>
     </form>
 
@@ -32,7 +39,7 @@
 
     <hr>
     <h3>Visit Information Records (coming from REDCap Copy)</h3>
-    <table class="table table-striped">
+    <table class="table table-bordered">
         <thead class="thead-light">
             <tr>
                 <th>Record ID</th>
@@ -41,14 +48,14 @@
                 <th>Visit Studies</th>
                 <th>Visit Age</th>
                 <th>Visit Group</th>
-                <th>Processed?</th>
+                <th>Status</th>
                 <th>Created Instrument/Instance #</th>
                 <th>Action</th>
             </tr>
         </thead>
         <tbody>
             {% for visit in visits %}
-                <tr>
+                <tr {% if visit.completed_visit and visit.completed_visit.ignore %}class="table-secondary"{% elif visit.completed_visit %}class="table-success"{% endif %}>
                     <td>{{ visit.record_id }}</td>
                     <td>{{ visit.redcap_repeat_instance }}</td>
                     <td>{{ visit.visit_info_date }}</td>
@@ -56,8 +63,10 @@
                     <td>{{ visit.visit_info_age|floatformat:2 }}</td>
                     <td>{{ visit.group_name }}</td>
                     <td>
-                        {% if visit.completed_visit %}
-                            YES
+                        {% if visit.completed_visit and visit.completed_visit.ignore %}
+                            ignored
+                        {% elif visit.completed_visit %}
+                            processed
                         {% endif %}
                     </td>
                     <td>
@@ -69,19 +78,36 @@
                             {% endfor %}
                         {% endif %}
                     </td>
-                    <td>
-                        {% if visit.completed_visit %}
+                    <td class="text-nowrap">
+                        {% if visit.completed_visit and not visit.completed_visit.ignore %}
                             <form method="post" action="{% url 'delete_instruments' visit.record_id visit.redcap_repeat_instance %}">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-danger">
+                                <button type="submit" class="btn btn-sm btn-danger">
                                     Delete instruments
                                 </button>
                             </form>
-                        {% else %}
+                        {% endif %}
+                        {% if not visit.completed_visit %}
                             <form method="post" action="{% url 'create_instruments' visit.record_id visit.redcap_repeat_instance %}">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-sm btn-success">
                                     Create instruments
+                                </button>
+                            </form>
+                        {% endif %}
+                        {% if visit.completed_visit and visit.completed_visit.ignore %}
+                            <form method="post" action="{% url 'delete_instruments' visit.record_id visit.redcap_repeat_instance %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-warning">
+                                    Stop Ignoring
+                                </button>
+                            </form>
+                        {% endif %}
+                        {% if not visit.completed_visit %}
+                            <form method="post" action="{% url 'ignore_visits' visit.record_id visit.redcap_repeat_instance %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-warning">
+                                    Ignore visit
                                 </button>
                             </form>
                         {% endif %}

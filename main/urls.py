@@ -13,6 +13,9 @@ urlpatterns = [
     path('create_instruments/<int:record_id>/<int:redcap_repeat_instance>', views.create_instruments, name='create_instruments'),
     path('create_instruments', views.create_instruments, name='create_instruments'),
 
+    path('ignore_visits/<int:record_id>/<int:redcap_repeat_instance>', views.ignore_visits, name='ignore_visits'),
+    path('ignore_visits', views.ignore_visits, name='ignore_visits'),
+
     path('delete_instruments/<int:record_id>/<int:redcap_repeat_instance>', views.delete_instruments, name='delete_instruments'),
     path('delete_instruments', views.delete_instruments, name='delete_instruments'),
 

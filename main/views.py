@@ -10,7 +10,12 @@ from django.contrib import messages
 from django.db.models import ProtectedError
 
 from redcap_importer.models import RedcapConnection
-from .instrument_management import create_instruments_for_one_visit, create_instruments_for_all_incomplete
+from .instrument_management import (
+    create_instruments_for_one_visit,
+    create_instruments_for_all_incomplete,
+    ignore_instruments_for_one_visit,
+    ignore_instruments_for_all_incomplete,
+)
 
 from . import models
 from . import utils
@@ -217,6 +222,23 @@ def create_instruments(request, record_id=None, redcap_repeat_instance=None):
         error_messages = create_instruments_for_one_visit(record_id, redcap_repeat_instance)
     else:
         error_messages = create_instruments_for_all_incomplete()
+    for error_message in error_messages:
+        messages.error(request, error_message)
+    messages.success(request, "update complete")
+    return redirect("test_rules")
+
+@login_required
+def ignore_visits(request, record_id=None, redcap_repeat_instance=None):
+    """
+    Flag specified visit (or leave blank for all incomplete visits) as ignore, meaning that
+    the create instruments functionality should never be run.
+    """
+    if request.method != "POST":
+        return redirect("test_rules")
+    if record_id or redcap_repeat_instance:
+        error_messages = ignore_instruments_for_one_visit(record_id, redcap_repeat_instance)
+    else:
+        error_messages = ignore_instruments_for_all_incomplete()
     for error_message in error_messages:
         messages.error(request, error_message)
     messages.success(request, "update complete")
