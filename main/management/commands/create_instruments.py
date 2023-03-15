@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
+from main.instrument_management import create_instruments_for_all_incomplete
 
 class Command(BaseCommand):
     # provide some help text
@@ -11,4 +12,8 @@ class Command(BaseCommand):
 
     # this will be executed when the command is called
     def handle(self, *args, **options):
-        self.stdout.write('hello world')
+        self.stdout.write('### Starting instrument creation ####################')
+        response = create_instruments_for_all_incomplete()
+        for error in response:
+            self.stdout.write(error)
+        self.stdout.write('### Instrument creation complete ####################')
