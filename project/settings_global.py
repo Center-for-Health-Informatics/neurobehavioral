@@ -25,8 +25,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.23.20.171', '10.23.20.189', '127.0.0.1', 'localhost',
-    'chi-dev.uc.edu', 'chi-test.uc.edu', 'chi-tools.uc.edu', 'chi.uc.edu']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -155,12 +154,12 @@ AUTH_USER_MODEL = "user_manager.User"
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'user_manager.authentication_backends.ChiAuthBackend',
+    # 'user_manager.authentication_backends.ChiAuthBackend',
 ]
 
-CHI_AUTH_AUTOCREATE_LOCAL_USER = True
-CHI_AUTH_CHECK_SYSTEMS = 'local, ucad'
-CHI_AUTH_AUTOCREATE_CHI_AUTH_USER = False            # when local user is created, signal is used to create the user in CHI_AUTH as well
+# CHI_AUTH_AUTOCREATE_LOCAL_USER = True
+# CHI_AUTH_CHECK_SYSTEMS = 'local, ucad'
+# CHI_AUTH_AUTOCREATE_CHI_AUTH_USER = False            # when local user is created, signal is used to create the user in CHI_AUTH as well
 
 LOGIN_URL = '/user_manager/login'                   # this url gets called when @login_required view is accessed
 LOGIN_URL_FOR_LINK = '/user_manager/login'          # use as a sign in link <a href="{{ LOGIN_URL_FOR_LINK }}">Sign In</a>
