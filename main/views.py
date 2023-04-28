@@ -65,6 +65,7 @@ def test_rules(request):
         visits.append(entry)
     context["visits"] = visits
     context["current_page"] = "test_rules"
+    context["VISIT_INFO_CUTOFF_DATE"] = settings.VISIT_INFO_CUTOFF_DATE
     return render(request, 'main/test_rules.html', context)
 
 @login_required
