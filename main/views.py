@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import ProtectedError
+from django.conf import settings
 
 from redcap_importer.models import RedcapConnection
 from .instrument_management import (
@@ -32,10 +33,12 @@ def home(request):
 def test_rules(request):
     context = {}
     oConnection = RedcapConnection.objects.get(unique_name="main_repo")
+    date_cutoff = settings.VISIT_INFO_CUTOFF_DATE
     options = {
         'forms[1]': "visit_information",
         'fields[1]': 'record_id',
         'events[0]': 'all_measures_arm_1',
+        'filterLogic': f"[visit_info_date] >= '{date_cutoff}'"
     }
     response = utils.run_request("record", oConnection, options)
     visits = []

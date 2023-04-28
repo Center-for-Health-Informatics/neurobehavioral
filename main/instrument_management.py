@@ -1,6 +1,8 @@
 
 import datetime
 
+from django.conf import settings
+
 from redcap_importer.models import RedcapConnection
 
 from . import utils
@@ -30,12 +32,14 @@ def _create_or_ignore_instruments(record_id=None, redcap_repeat_instance=None, i
     """
     # get a list of visit_information records
     oConnection = RedcapConnection.objects.get(unique_name="main_repo")
+    date_cutoff = settings.VISIT_INFO_CUTOFF_DATE
     options = {
         'forms[1]': 'visit_information',
         'fields[1]': 'record_id',
         # 'fields[3]': 'visit_info_date',
         # 'fields[4]': 'visit_info_studies',
         'events[0]': 'all_measures_arm_1',
+        'filterLogic': f"[visit_info_date] >= '{date_cutoff}'"
     }
     response = utils.run_request("record", oConnection, options)
 
