@@ -187,10 +187,14 @@ def update_visit_info_metadata(request):
         oStudy.save()
     for study in studies:
         study_number, study_name = study.split(", ", 1)
-        oStudy, created = models.Study.objects.get_or_create(
-            study_number=int(study_number),
-            study_name=study_name
-        )
+        oStudy = models.Study.objects.filter(study_number=int(study_number)).first()
+        if oStudy:
+            oStudy.study_name = study_name
+        else:
+            oStudy = models.Study(
+                study_number=int(study_number),
+                study_name=study_name
+            )
         oStudy.missing = False
         oStudy.save()
 
