@@ -46,7 +46,7 @@ def test_rules(request):
         if not entry["redcap_repeat_instance"]:
             continue
         visit_studies = []
-        for i in range(13):
+        for i in range(50):
             field_name = "visit_info_studies___" + str(i)
             if entry.get(field_name) == "1":
                 oStudy = models.Study.objects.filter(study_number=i).first()
